@@ -3,6 +3,7 @@ defmodule Chatrooms.Client do
   here i will define client side of things
 
   """
+  alias Chatrooms.Port
 
   require Logger
 
@@ -13,7 +14,7 @@ defmodule Chatrooms.Client do
       {:packet, :line}
     ]
 
-    {:ok, socket} = :gen_tcp.connect(:localhost,4002, connect_options)
+    {:ok, socket} = :gen_tcp.connect(:localhost,Port.definePort, connect_options)
 
     sending(socket)
 
@@ -23,12 +24,15 @@ defmodule Chatrooms.Client do
   end
 
   def sending(socket) do
-    :ok = :gen_tcp.send(socket, "hello from the servre\n")
+
+    message = IO.gets("message :: ")
+    :ok = :gen_tcp.send(socket, message)
 
 
     case :gen_tcp.recv(socket, 0) do
       {:ok, message} ->
         Logger.info(message)
+        sending(socket)
         :gen_tcp.close(socket)
       {:error, error} -> Logger.error(error <> "server closed")
     end
